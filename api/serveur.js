@@ -12,7 +12,7 @@ app.get('/cartes', (req,res) => {
 });
 
 app.get('/carte/:numero', (req,res) => {
-    console.log("[GET] /cartes/:nom ... nom: "+req.params.numero);
+    console.log("[GET] /carte/:numero ... numero: "+req.params.numero);
     const numero = req.params.numero;
     const carte = cartes.find(carte => carte.numero === numero)
     res.status(200).json(carte)
@@ -76,7 +76,7 @@ app.post('/addMoney', (req,res) => {
 });
 
 
-const port = 3333;
+const port = 8080;
 app.listen(port, () => {
-    console.log('Serveur à l\'écoute su r le port '+port)
+    console.log('Serveur lancé sur le port '+port)
 });
