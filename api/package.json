@@ -1,0 +1,22 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "Api de simulation de paiement pour le site web",
+  "main": "serveur.js",
+  "scripts": {
+    "test": "node serveur.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benjaminglt1/TPINFO910.git"
+  },
+  "author": "Benjamin Gallet - Stephan Kitschminyof",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/benjaminglt1/TPINFO910/issues"
+  },
+  "homepage": "https://github.com/benjaminglt1/TPINFO910#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
