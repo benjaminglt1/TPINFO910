@@ -2,10 +2,10 @@ version: "3.9"
 
 services:
   api:
-    image: payementapi
+    build: ./api
     restart: always
     ports:
-      - 8080:8080
+      - ${API_PORT}:8080
   db:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
@@ -16,10 +16,12 @@ services:
       MYSQL_ROOT_PASSWORD: "root"
 
   flaskserver:
-    image: flaskapp
+    build: .
     restart: always
     ports:
-      - 3333:3333
+      - ${APP_PORT}:3333
+    volumes:
+      - ${APP_SOURCES}:/app/appSources
     depends_on:
       - db
 

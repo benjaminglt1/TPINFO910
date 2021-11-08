@@ -15,7 +15,7 @@ def home():
 @app.route('/testdb')
 def testdb():
     cursor = mysql.connection.cursor()
-    cursor.execute(''' SELECT * FROM users ''')
+    cursor.execute(''' SELECT * FROM Utilisateur ''')
     data = cursor.fetchall()
     cursor.close()
     print(data)

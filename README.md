@@ -58,11 +58,12 @@ networks:
 
 # Installation
 
-## Build flaskserver
+## Création du fichier d'environement
 ```bash
-#Dans le dossier principal
-$docker build -t flaskapp:latest .
+#Dans le dossier racine
+$sh ./init.sh
 ```
+
 ## Run app
 ```bash
 #Dans le dossier principal

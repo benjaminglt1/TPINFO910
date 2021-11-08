@@ -131,3 +131,6 @@ dmypy.json
 # nodes
 node_modules/
 package-lock.json
+
+#Environement Files
+.env
