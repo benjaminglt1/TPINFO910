@@ -15,7 +15,10 @@
 <h4>Description</h4>
 <p>{{ jeu[2] }}</p>
 <h4>Prix : {{ jeu[3] }} €</h4>
-<button>Ajouter au panier</button>
+<form action="/ajoutPanier" method="post">
+    <input type="hidden" name="idjeu" value="{{ jeu[0] }}">
+    <input type="submit" value="Ajouter au panier">
+</form>
 <br>
 {% endfor %}
 {% endblock %}

@@ -2,13 +2,12 @@
 
 {% block content %}
 <h1>{{ title }}</h1>
-
+<h2>Top 5 des jeux :</h2>
 {% for jeu in jeux %}
 <h3>{{ jeu[1] }}</h3>
 <h4>Description</h4>
 <p>{{ jeu[2] }}</p>
 <h4>Prix : {{ jeu[3] }} €</h4>
-<button>Ajouter au panier</button>
 <br>
 {% endfor %}
 {% endblock %}

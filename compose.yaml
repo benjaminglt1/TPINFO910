@@ -3,6 +3,7 @@ version: "3.9"
 services:
   api:
     build: ./api
+    image: ghcr.io/benjaminglt1/tpinfo910_api:latest
     restart: always
     ports:
       - ${API_PORT}:8080
@@ -17,6 +18,7 @@ services:
 
   flaskserver:
     build: .
+    image: ghcr.io/benjaminglt1/tpinfo910_frontend:latest
     restart: always
     ports:
       - ${APP_PORT}:3333

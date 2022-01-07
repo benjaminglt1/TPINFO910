@@ -1,190 +1,43 @@
-GALLET Benjamin
-KITSCHMYOF Stephan
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    app: db
+spec:
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5.6
+        imagePullPolicy: Never
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        ports:
+        - containerPort: 3306
+          name: db-container
+        volumeMounts:
+        - name: mysql-initdb
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: mysql-initdb
+          configMap:
+            name: mysql-initdb-config
 
-# TPINFO910
-Projet correspondant au TP d'INFO910 - DevOps
-
-# Sujet
-Nous avons choisi de réaliser un site de vente.
-Quand nous arrivons sur la page d'accueil, il faut se connecter :
-
-![Page_connexion](images/page_connexion.png) 
-```
-Combinaisons login - mot de passe valides
-log1 - pass1
-log2 - pass2
-log3 - pass3
-log4 - pass4
-```
-L'utilisateur peut ensuite regarder les différents jeux en vente sur le site :
-
-![Page_jeux](images/page_jeux.png)
-
-L'utilisateur peut ajouter des jeux à son panier et les payer :
-
-![Page_panier](images/page_panier.png)
-
-```
-Numéros de cartes valides :
-1234123412341234
-5678567856785678
-9999999999999999
-
-La date d'expiration et le cryptogramme visuel ne sont pas pris en compte lors du paiement.
-```
-
-# Architecture du projet
-- api
-- appSources
-    - static
-    - templates
-    - \_\_init\_\_.py
-- bdd
-- images
-- kubernetes
-- compose.yaml
-- Dockerfile
-- requirements.txt
-- server.py 
-
-# Les containers
-## Serveur web
-La première partie de notre application est la partie web. Nous avons choisi de développer le site avec le framework Flask qui permet le développement de sites web en python.
-
-Pour créer ce container, nous avons pris pour base l'image officielle python à laquelle nous avons fait exécuter la commande pour installer les packages nécessaires pour flask.
-
-Nous copions ensuite nos sources dans le répertoire app de notre container.
-
-Enfin, nous lançons la commande pour démarrer notre serveur flask.
-
-### Docker File
-```docker
-FROM python:latest
-
-WORKDIR /app
-
-COPY . /app
-RUN pip3 install -r requirements.txt
-
-CMD ["python3","runserver.py"]
-```
-## API
-Pour simuler les paiements sur le site, nous avons créé une api qui va stocker des cartes et simuler un paiement quand nous allons l'appeler. 
-
-### Requête
-Pour effectuer une transaction avec une carte, nous utilisons la route **/makeOperation**. 
-
-Nous transmettons aussi :
-- le numéro de la carte : pour que notre api sache si la carte est valide ou non
-- le montant de la transaction : l'api va alors retrancher ce montant du solde de la carte. Si le solde n'est pas négatif alors la tranction sera renvoyée comme valide.
-```bash
-$curl --location --request POST 'localhost:8080/makeOperation' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "numero":"1234123412341234",
-    "montant":100
-}'
-```
-### Réponse
-```json
-{
-  "status":"valide"
-}
-```
-### Docker File
-Pour cette api, nous avons choisi le package node express.
-
-Nous nous basons sur une version node-14 alpine pour que la taille de l'image de notre container soit la plus réduite possible.
-
-Nous installons ensuite les dépendances puis nous lançons la commande qui permet de démarrer notre serveur express.
-```dockerfile
-FROM node:14-alpine
-
-WORKDIR /app
-
-COPY . /app/
-
-RUN npm install
-
-EXPOSE 8080
-
-CMD ["node","serveur.js"]
-```
-## Base de données
-Nous avons une base mysql qui va se construire à son premier lancement via un fichier sql disponible dans le dossier bdd du projet.
-
-# Configuration pour Docker
-Afin d'orchestrer ces 3 containers, nous avons fait un fichier docker-compose.
-Il est composé de 3 services qui correspondent à nos 3 containers.
-
-Pour chacun des containers, nous allons spécifier l'emplacement de leur image ou comment les builder quand cela est possible.
-
-Nous allons aussi faire un binding de port entre notre réseau et le réseau des containers.
-
-Nous allons aussi préciser pour la base de données, la méthode d'authentification ainsi que le fichier qui doit l'initialiser.
-
-## Docker compose
-```yaml
-version: "3.9"
-
-services:
-  api:
-    build: ./api
-    image: ghcr.io/benjaminglt1/tpinfo910_api:latest
-    restart: always
-    ports:
-      - ${API_PORT}:8080
-  db:
-    image: mysql
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    volumes:
-      - "./bdd/bdd_finale.sql:/docker-entrypoint-initdb.d/bdd_finale.sql"
-    environment:
-      MYSQL_ROOT_PASSWORD: "root"
-
-  flaskserver:
-    build: .
-    image: ghcr.io/benjaminglt1/tpinfo910_frontend:latest
-    restart: always
-    ports:
-      - ${APP_PORT}:3333
-    volumes:
-      - ${APP_SOURCES}:/app/appSources
-    depends_on:
-      - db
-
-networks:
-  demonet:
-```
-
-# Configuration pour Kubernetes
-
-## Utilisation du registry github
-Pour utiliser ce registry, il faut :
-- S'identifier à l'aide de son compte
-```bash
-#Exemple
-docker login ghcr.io -u USERNAME --password-stdin
-```
-- Construire l'image de notre application localement
-```bash
-#Exemple
-docker build -t ghcr.io/benjaminglt1/tpinfo910_frontend:latest .
-```
-- Envoyer cette image sur le registry
-```bash
-#Exemple
-docker push ghcr.io/benjaminglt1/tpinfo910_frontend:latest 
-```
-
-Une fois ces trois étapes effectuées, nous pouvons utiliser nos images et les télécharger.
-## Fichiers Kubernetes
-### Base de données
-```yaml
+---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
 data:
-  init-db.sql: | 
+  initdb.sql: |
     SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
     SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
     SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
@@ -582,190 +435,19 @@ data:
     INSERT INTO Jeux_Utilisateur(IdUtilisateur,IdJeu) VALUES (4,5);
     INSERT INTO Jeux_Utilisateur(IdUtilisateur,IdJeu) VALUES (4,8);
     INSERT INTO Jeux_Utilisateur(IdUtilisateur,IdJeu) VALUES (4,9);
-kind: ConfigMap
-metadata:
-  name: init-db
 
 ---
 apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-web-pvc
-spec:
-  resources:
-    requests:
-      storage: "1Gi"
-  volumeMode: Filesystem
-  accessModes:
-    - ReadWriteOnce
----
-apiVersion: apps/v1
-kind: Deployment
+kind: Service
 metadata:
   name: mysql
   labels:
-    app: info910
-    role: mysql
+    app: db
 spec:
-  selector:
-    matchLabels:
-      app: info910
-      role: mysql
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      labels:
-        app: info910
-        role: mysql
-    spec:
-      containers:
-      - name: db
-        image: mysql:latest
-        args: 
-          - "--default-authentication-plugin=mysql_native_password"
-        ports:
-        - containerPort: 3306
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          value: root
-        volumeMounts:
-          - name: mysql-data
-            mountPath: /var/lib/mysql
-          - name: web-init-db
-            mountPath: /docker-entrypoint-initdb.d/
-      volumes:
-        - name: mysql-data
-          persistentVolumeClaim:
-            claimName: mysql-web-pvc
-        - name: web-init-db
-          configMap:
-            name: init-db
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: "db"
-  labels:
-    app: info910
-    role: mysql
-spec:
-  selector:
-    app: info910
-    role: mysql
   ports:
   - port: 3306
     targetPort: 3306
-```
-### API
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: api
-  labels:
-    app: info910
-    role: front
-spec:
+    protocol: TCP
+    name: mysql
   selector:
-    matchLabels:
-      app: info910
-      role: front
-  template:
-    metadata:
-      labels:
-        app: info910
-        role: front
-    spec:
-      containers:
-      - name: api
-        image: "ghcr.io/benjaminglt1/tpinfo910_api:latest"
-        ports:
-        - containerPort: 8080
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: api
-  labels:
-    app: info910
-    role: front
-spec:
-  selector:
-    app: info910
-    role: front
-  type: ClusterIP
-  ports:
-  - port: 8080
-    targetPort: 8080  
-```
-### Application web
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: web
-  labels:
-    app: info910
-    role: front
-spec:
-  selector:
-    matchLabels:
-      app: info910
-      role: front
-  template:
-    metadata:
-      labels:
-        app: info910
-        role: front
-    spec:
-      containers:
-      - name: web
-        image: "ghcr.io/benjaminglt1/tpinfo910_frontend:latest"
-        ports:
-        - containerPort: 3333
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: web
-  labels:
-    app: info910
-    role: front
-spec:
-  selector:
-    app: info910
-    role: front
-  type: ClusterIP
-  ports:
-  - port: 3333
-    targetPort: 3333  
-```
-
-# Installation
-
-## Création du fichier d'environnement
-```bash
-#Dans le dossier racine
-$sh ./init.sh
-```
-
-## Lancer avec docker
-```bash
-#Dans le dossier principal
-$docker compose up
-```
-
-## Lancer avec kubernetes
-```bash
-#Dans le dossier principal
-$kubectl apply -f ./kubernetes
-
-#Pour effectuer un mappage des ports pour le service web
-kubectl port-forward NOM_POD 3333:3333
-```
+    app: db
