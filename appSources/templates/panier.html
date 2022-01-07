@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+{% for jeu in jeux %}
+<h3>{{ jeu[0] }}</h3>
+<h4>Prix</h4>
+<p>{{ jeu[1] }}</p>
+<br>
+{% endfor %}
+
+<h3>Total à payer : {{ total }}</h3>
+
+<form action="/payement" method="post">
+    <h1>Information de paiement :</h1>
+    <label for="numero">Numéro de carte :</label>
+    <input type="text" name="numero" id="numero">
+    <label for="date">Date d'expiration (mmyy) :</label>
+    <input type="text" name="date" id="date">
+    <label for="cvv">Cvv :</label>
+    <input type="text" name="cvv" id="cvv">
+    <input type="submit" value="Payer">
+</form>
+
+{% endblock %}

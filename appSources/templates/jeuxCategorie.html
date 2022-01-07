@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<h2>Catégories</h2> 
+<ul>
+{% for cat in categories %}
+<li><a href="{{ url_for('jeuxCategorie',categorie=cat[0]) }}">{{ cat[1] }}</a></li>
+{% endfor %}
+</ul>
+
+{% for jeu in jeux %}
+<h3>{{ jeu[1] }}</h3>
+<h4>Description</h4>
+<p>{{ jeu[2] }}</p>
+<h4>Prix : {{ jeu[3] }} €</h4>
+<form action="/ajoutPanier" method="post">
+    <input type="hidden" name="idjeu" value="{{ jeu[0] }}">
+    <input type="submit" value="Ajouter au panier">
+</form>
+<br>
+{% endfor %}
+{% endblock %}

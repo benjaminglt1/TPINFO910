@@ -2,12 +2,13 @@
 
 {% block content %}
 <h1>{{ title }}</h1>
-<h2>Top 5 des jeux :</h2>
 {% for jeu in jeux %}
-<h3>{{ jeu[1] }}</h3>
+<h3>{{ jeu[0] }}</h3>
 <h4>Description</h4>
-<p>{{ jeu[2] }}</p>
-<h4>Prix : {{ jeu[3] }} €</h4>
+<p>{{ jeu[1] }}</p>
+<button>Télécharger</button>
+<button>Jouer</button>
 <br>
 {% endfor %}
+
 {% endblock %}

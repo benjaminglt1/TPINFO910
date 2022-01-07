@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>{{ jeu[1] }}</h1>
+<h2>Description</h2>
+<p>{{ jeu[2] }}</p>
+<h2>Prix : {{ jeu[3] }}</h2>
+<h2>Editeur : {{ editeur[1] }}</h2>
+
+{% if achetable %}
+    <button>Ajouter au panier</button>    
+
+{% else %}
+    <button>Télécharger</button>
+    <button>Jouer</button>
+{% endif %}
+
+
+{% endblock %}
