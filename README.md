@@ -758,7 +758,7 @@ $sh ./init.sh
 ## Lancer avec docker
 ```bash
 #Dans le dossier principal
-$docker compose up
+$docker-compose up
 ```
 
 ## Lancer avec kubernetes
@@ -767,5 +767,7 @@ $docker compose up
 $kubectl apply -f ./kubernetes
 
 #Pour effectuer un mappage des ports pour le service web
+kubectl get pods
+#La commande va afficher une liste des pods. Il faut récupérer le nom complet du pod qui commence par "web-"
 kubectl port-forward NOM_POD 3333:3333
 ```
